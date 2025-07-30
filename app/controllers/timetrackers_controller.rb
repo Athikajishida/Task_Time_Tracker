@@ -3,7 +3,7 @@ class TimetrackersController < ApplicationController
   before_action :set_timetracker, only: [:update]
 
   def create
-    @timetracker = @task.timetrackers.build(started_at: Time.current)
+    @timetracker = @task.timetrackers.build(start_time: Time.current)
     if @timetracker.save
       redirect_to project_tasks_path(@task.project), notice: "Timer started."
     else
@@ -12,7 +12,7 @@ class TimetrackersController < ApplicationController
   end
 
   def update
-    if @timetracker.update(ended_at: Time.current)
+    if @timetracker.update(end_time: Time.current)
       redirect_to project_tasks_path(@timetracker.task.project), notice: "Timer stopped."
     else
       redirect_to project_tasks_path(@timetracker.task.project), alert: "Could not stop timer."

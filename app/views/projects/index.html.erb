@@ -1,5 +1,4 @@
-<h1>Projects#index</h1>
-<p>Find me in app/views/projects/index.html.erb</p>
+
 <h1>Projects</h1>
 
 <%= form_with model: @project, local: true do |form| %>
@@ -12,6 +11,7 @@
     <li>
       <%= project.name %> |
       <%= link_to "Manage Tasks", project_tasks_path(project) %>
+      <%= button_to "Delete", project_path(project), method: :delete, data: { confirm: "Are you sure?" } %>
     </li>
   <% end %>
 </ul>

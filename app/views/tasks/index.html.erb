@@ -12,7 +12,7 @@
 <% @tasks.each do |task| %>
   <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
     <strong><%= task.title %></strong>
-    (<%= task.status == "completed" ? "✅ Done" : "⏳ In Progress" %>)
+    (<%= task.status == "completed" ? "Done" : "In Progress" %>)
 
     <!-- Mark as complete -->
     <% unless task.status == "completed" %>
@@ -20,23 +20,32 @@
     <% end %>
 
     <!-- Timer -->
-   <% running_timers = task.timetrackers.where(end_time: nil) %>
-        <% if running_timers.any? %>
+    <% unless task.status == "completed" %>
+      <% running_timers = task.timetrackers.running %>
+      <% if running_timers.any? %>
         <% running_timer = running_timers.first %>
         <%= form_with model: [@project, task, running_timer], method: :patch, local: true do |f| %>
-            <%= f.submit "Stop Timer" %>
+          <%= f.submit "Stop Timer" %>
         <% end %>
+      <% else %>
+        <%= form_with url: project_task_timetrackers_path(@project, task), method: :post, local: true do |f| %>
+          <%= f.submit "Start Timer" %>
+        <% end %>
+      <% end %>
     <% end %>
-
 
     <!-- Time Logs -->
     <p><strong>Time Logs:</strong></p>
     <ul>
+      <% total_time = 0 %>
       <% task.timetrackers.each do |log| %>
         <li>
-          Started at: <%= log.start_time %>
+          Started: <%= log.start_time.strftime("%d %b %I:%M %p") %>
           <% if log.end_time %>
-            , Ended at: <%= log.end_time %>
+            , Ended: <%= log.end_time.strftime("%I:%M %p") %>
+            <% duration = ((log.end_time - log.start_time) / 60).round %>
+            , Duration: <%= duration %> min
+            <% total_time += duration %>
           <% else %>
             , <em>Running...</em>
           <% end %>
@@ -44,13 +53,20 @@
       <% end %>
     </ul>
 
+    <% if task.status == "completed" %>
+      <p><strong>Total Time Spent:</strong> <%= total_time %> minutes</p>
+    <% end %>
+
     <p><strong>Comments:</strong></p>
     <ul>
       <% task.comments.each do |comment| %>
-        <li><%= comment.content %> - <%= comment.created_at.strftime("%H:%M %p") %></li>
+        <li>
+          <%= comment.content %> - <%= comment.created_at.strftime("%d %b %I:%M %p") %>
+        </li>
       <% end %>
     </ul>
 
+    
     <%= form_with model: [@project, task, Comment.new], local: true do |f| %>
       <%= f.text_field :content, placeholder: "Add comment" %>
       <%= f.submit "Comment" %>
