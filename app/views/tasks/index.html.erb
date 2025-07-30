@@ -1,0 +1,61 @@
+<h2>Tasks for Project: <%= @project.name %></h2>
+<%= link_to "← Back to Projects", projects_path %>
+
+<!-- Add new task -->
+<%= form_with url: project_tasks_path(@project), method: :post, local: true do |form| %>
+  <%= form.text_field :title, placeholder: "Task title" %>
+  <%= form.submit "Add Task" %>
+<% end %>
+
+<hr>
+
+<% @tasks.each do |task| %>
+  <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
+    <strong><%= task.title %></strong>
+    (<%= task.completed? ? "✅ Done" : "⏳ In Progress" %>)
+
+    <!-- Mark as complete -->
+    <% unless task.completed? %>
+      <%= button_to "Mark Complete", project_task_path(@project, task), method: :patch %>
+    <% end %>
+
+    <!-- Timer -->
+    <% if task.timetrackers.running.any? %>
+      <% running_timer = task.timetrackers.running.first %>
+      <%= form_with model: [@project, task, running_timer], method: :patch, local: true do |f| %>
+        <%= f.submit "Stop Timer" %>
+      <% end %>
+    <% else %>
+      <%= form_with url: project_task_timetrackers_path(@project, task), method: :post, local: true do |f| %>
+        <%= f.submit "Start Timer" %>
+      <% end %>
+    <% end %>
+
+    <!-- Time Logs -->
+    <p><strong>Time Logs:</strong></p>
+    <ul>
+      <% task.timetrackers.each do |log| %>
+        <li>
+          Started at: <%= log.start_time %>
+          <% if log.end_time %>
+            , Ended at: <%= log.end_time %>
+          <% else %>
+            , <em>Running...</em>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+
+    <p><strong>Comments:</strong></p>
+    <ul>
+      <% task.comments.each do |comment| %>
+        <li><%= comment.content %> - <%= comment.created_at.strftime("%H:%M %p") %></li>
+      <% end %>
+    </ul>
+
+    <%= form_with url: project_task_comments_path(@project, task), method: :post, local: true do |f| %>
+      <%= f.text_field :content, placeholder: "Add comment" %>
+      <%= f.submit "Comment" %>
+    <% end %>
+  </div>
+<% end %>
