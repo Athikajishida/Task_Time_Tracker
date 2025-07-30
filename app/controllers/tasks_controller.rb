@@ -17,7 +17,7 @@ class TasksController < ApplicationController
   end
 
   def update
-    if @task.update(completed: true)
+    if @task.update(status: "completed")
       redirect_to project_tasks_path(@project), notice: "Task marked as complete."
     else
       redirect_to project_tasks_path(@project), alert: "Failed to update task."

@@ -2,7 +2,7 @@
 <%= link_to "← Back to Projects", projects_path %>
 
 <!-- Add new task -->
-<%= form_with url: project_tasks_path(@project), method: :post, local: true do |form| %>
+<%= form_with model: [@project, Task.new], local: true do |form| %>
   <%= form.text_field :title, placeholder: "Task title" %>
   <%= form.submit "Add Task" %>
 <% end %>
@@ -12,24 +12,22 @@
 <% @tasks.each do |task| %>
   <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 10px;">
     <strong><%= task.title %></strong>
-    (<%= task.completed? ? "✅ Done" : "⏳ In Progress" %>)
+    (<%= task.status == "completed" ? "✅ Done" : "⏳ In Progress" %>)
 
     <!-- Mark as complete -->
-    <% unless task.completed? %>
+    <% unless task.status == "completed" %>
       <%= button_to "Mark Complete", project_task_path(@project, task), method: :patch %>
     <% end %>
 
     <!-- Timer -->
-    <% if task.timetrackers.running.any? %>
-      <% running_timer = task.timetrackers.running.first %>
-      <%= form_with model: [@project, task, running_timer], method: :patch, local: true do |f| %>
-        <%= f.submit "Stop Timer" %>
-      <% end %>
-    <% else %>
-      <%= form_with url: project_task_timetrackers_path(@project, task), method: :post, local: true do |f| %>
-        <%= f.submit "Start Timer" %>
-      <% end %>
+   <% running_timers = task.timetrackers.where(end_time: nil) %>
+        <% if running_timers.any? %>
+        <% running_timer = running_timers.first %>
+        <%= form_with model: [@project, task, running_timer], method: :patch, local: true do |f| %>
+            <%= f.submit "Stop Timer" %>
+        <% end %>
     <% end %>
+
 
     <!-- Time Logs -->
     <p><strong>Time Logs:</strong></p>
@@ -53,9 +51,10 @@
       <% end %>
     </ul>
 
-    <%= form_with url: project_task_comments_path(@project, task), method: :post, local: true do |f| %>
+    <%= form_with model: [@project, task, Comment.new], local: true do |f| %>
       <%= f.text_field :content, placeholder: "Add comment" %>
       <%= f.submit "Comment" %>
     <% end %>
+
   </div>
 <% end %>

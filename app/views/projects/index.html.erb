@@ -2,7 +2,7 @@
 <p>Find me in app/views/projects/index.html.erb</p>
 <h1>Projects</h1>
 
-<%= form_with url: projects_path, method: :post, local: true do |form| %>
+<%= form_with model: @project, local: true do |form| %>
   <%= form.text_field :name, placeholder: "New Project Name" %>
   <%= form.submit "Create" %>
 <% end %>
