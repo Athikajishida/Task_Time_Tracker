@@ -47,7 +47,7 @@ A simple productivity app built with **Ruby on Rails** for managing tasks and tr
 
 ## 🔮 Future Improvements
 - ✨ **UI Enhancements**  
-  Implement a modern and responsive UI using **Tailwind CSS** or integrate with **React** for dynamic front-end behavior.
+  Implement a modern and responsive UI using **Tailwind CSS**
 
 - 🔴 **Real-time Features**  
   Use **Action Cable** and **Turbo Streams** to support real-time updates such as live task timers, instant comment updates, and status changes.
